@@ -1,0 +1,44 @@
+#!/bin/bash
+# claude-safe: Run Claude Code in a sandboxed container
+# Usage: cd /path/to/project && /path/to/claude-safe [claude args...]
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Build image if it doesn't exist
+if ! podman image exists claude-safe; then
+  echo "Building claude-safe image..."
+  user_name=$(id -u -n)
+  podman build --build-arg USER_NAME=${user_name} -t claude-safe "$SCRIPT_DIR"
+fi
+
+mkdir -p $HOME/.claude
+touch $HOME/.claude.json
+
+# Derive a container name from the current directory
+CONTAINER_NAME="claude-$(basename "$PWD" | tr '[:upper:]' '[:lower:]' | tr -c -d '[:graph:]' | tr -c -s '[:alnum:]' '-')-$(date +%Y%m%d-%H%M%S)"
+
+exec podman run --rm -it \
+  --tz=local \
+  --name "$CONTAINER_NAME" \
+  --network=host \
+  --userns=keep-id \
+  --pid=host \
+  -v "$PWD":"$PWD":z \
+  -v "$HOME/.claude.json":"$HOME/.claude.json":rw,z \
+  -v "$HOME/.claude":"$HOME/.claude":rw,z \
+	-v "$HOME/.config/gcloud":"$HOME/.config/gcloud":ro,z \
+  -v "$HOME/.config/gh":"$HOME/.config/gh":ro,z \
+  -v "$HOME/.config/JetBrains":"$HOME/.config/JetBrains":ro,z \
+  -v "/tmp/claude-$(id -u)":/tmp/claude-$(id -u):rw,z \
+  -w "$PWD" \
+  -e CLAUDE_CODE_USE_VERTEX \
+  -e ANTHROPIC_API_KEY \
+  -e CLOUD_ML_REGION \
+  -e ANTHROPIC_VERTEX_PROJECT_ID \
+  -e CLAUDE_CODE_SSE_PORT \
+  -e CLAUDE_CODE_ENTRYPOINT \
+  -e ENABLE_IDE_INTEGRATION \
+  -e TERMINAL_EMULATOR \
+  -e CLAUDECODE \
+  claude-safe \
+  claude --dangerously-skip-permissions "$@"
