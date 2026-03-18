@@ -4,8 +4,15 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Build image if it doesn't exist
-if ! podman image exists claude-safe; then
+# Check for rb! flag (force rebuild) as first argument
+FORCE_REBUILD=false
+if [[ "${1:-}" == "rb!" ]]; then
+  FORCE_REBUILD=true
+  shift
+fi
+
+# Build image if it doesn't exist or if force rebuild requested
+if $FORCE_REBUILD || ! podman image exists claude-safe; then
   echo "Building claude-safe image..."
   user_name=$(id -u -n)
   podman build --build-arg USER_NAME=${user_name} -t claude-safe "$SCRIPT_DIR"
@@ -24,6 +31,8 @@ exec podman run --rm -it \
   --userns=keep-id \
   --pid=host \
   -v "$PWD":"$PWD":z \
+  -v "$HOME/bin":"$HOME/bin":rw,z \
+  -v /home/linuxbrew/.linuxbrew:/home/linuxbrew/.linuxbrew:rw \
   -v "$HOME/.claude.json":"$HOME/.claude.json":rw,z \
   -v "$HOME/.claude":"$HOME/.claude":rw,z \
 	-v "$HOME/.config/gcloud":"$HOME/.config/gcloud":ro,z \
