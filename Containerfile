@@ -4,7 +4,7 @@ RUN dnf upgrade -y && \
     dnf group install -y development-tools && \
     dnf clean all
 
-RUN dnf install -y which && \
+RUN dnf install -y which wl-clipboard && \
     dnf clean all
 
 ARG USER_NAME
