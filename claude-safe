@@ -33,10 +33,15 @@ exec podman run --rm -it \
   -v "$PWD":"$PWD":z \
   -v "$HOME/bin":"$HOME/bin":rw,z \
   -v /home/linuxbrew/.linuxbrew:/home/linuxbrew/.linuxbrew:rw \
+  -v "$HOME/.ssh":"$HOME/.ssh":ro,z \
   -v "$HOME/.claude.json":"$HOME/.claude.json":rw,z \
   -v "$HOME/.claude":"$HOME/.claude":rw,z \
 	-v "$HOME/.config/gcloud":"$HOME/.config/gcloud":ro,z \
   -v "$HOME/.config/gh":"$HOME/.config/gh":rw,z \
+  -v "$HOME/.gitconfig":"$HOME/.gitconfig":ro,z \
+  -v "$HOME/.gitignore":"$HOME/.gitignore":ro,z \
+  -v "$HOME/.gitprivate.inc":"$HOME/.gitprivate.inc":ro,z \
+  -v "$HOME/.config/git":"$HOME/.config/git":ro,z \
   -v "$HOME/.config/JetBrains":"$HOME/.config/JetBrains":ro,z \
   -v "/tmp/claude-$(id -u)":/tmp/claude-$(id -u):rw,z \
   -w "$PWD" \
