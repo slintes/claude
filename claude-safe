@@ -18,8 +18,8 @@ if $FORCE_REBUILD || ! podman image exists claude-safe; then
   podman build --build-arg USER_NAME=${user_name} -t claude-safe "$SCRIPT_DIR"
 fi
 
-mkdir -p $HOME/.claude
-touch $HOME/.claude.json
+mkdir -p "$HOME/.claude" "/tmp/claude-$(id -u)"
+touch "$HOME/.claude.json"
 
 # Derive a container name from the current directory
 CONTAINER_NAME="claude-$(basename "$PWD" | tr '[:upper:]' '[:lower:]' | tr -c -d '[:graph:]' | tr -c -s '[:alnum:]' '-')-$(date +%Y%m%d-%H%M%S)"
